@@ -1,6 +1,6 @@
-package io.github.nathanjrussell.shapes.twod;
+package io.github.nathanjrussell.shapes.twod.polygons;
 
-public class Rectangle extends TwoDShape {
+public class Rectangle extends Polygon {
 
     private final double width;
     private final double height;
@@ -8,6 +8,10 @@ public class Rectangle extends TwoDShape {
     public Rectangle(double width, double height) {
         this.width = width;
         this.height = height;
+    }
+
+    public int numSides() {
+        return 4;
     }
 
     public double width() {

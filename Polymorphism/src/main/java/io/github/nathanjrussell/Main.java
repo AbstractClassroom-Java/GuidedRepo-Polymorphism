@@ -1,9 +1,11 @@
 package io.github.nathanjrussell;
 
-import io.github.nathanjrussell.shapes.twod.Circle;
-import io.github.nathanjrussell.shapes.twod.Rectangle;
-import io.github.nathanjrussell.shapes.twod.Square;
+import io.github.nathanjrussell.shapes.Shape;
 import io.github.nathanjrussell.shapes.twod.TwoDShape;
+import io.github.nathanjrussell.shapes.twod.nonpolygons.Circle;
+import io.github.nathanjrussell.shapes.twod.polygons.Polygon;
+import io.github.nathanjrussell.shapes.twod.polygons.Rectangle;
+import io.github.nathanjrussell.shapes.twod.polygons.Square;
 
 import java.util.ArrayList;
 
@@ -38,13 +40,32 @@ public class Main {
         }
 
         ArrayList<TwoDShape> shapes = new ArrayList<>();
-        shapes.add(new Circle(1.0));
-        shapes.add(new Rectangle(2.0, 3.0));
-        shapes.add(new Square(4.0));
+        shapes.add(circle);
+        shapes.add(rectangle);
+        shapes.add(square);
 
         for (TwoDShape shape : shapes) {
-            System.out.println("Area: " + shape.area());
-            System.out.println("Perimeter: " + shape.perimeter());
+            System.out.println(shape.area());
+            System.out.println(shape.perimeter());
+        }
+
+        ArrayList<Shape> allShapes = new ArrayList<>();
+        allShapes.add(circle);
+        allShapes.add(rectangle);
+        allShapes.add(square);
+
+        // Enhanced for-loop over a list of the more general type (Shape).
+        // We check `instanceof TwoDShape` because only 2D shapes have area/perimeter.
+        for (Shape shape : allShapes) {
+            if (shape instanceof TwoDShape) {
+                TwoDShape twoDShape = (TwoDShape) shape;
+                System.out.println(twoDShape.area());
+                System.out.println(twoDShape.perimeter());
+                if (twoDShape instanceof Polygon) {
+                    Polygon polygon = (Polygon) twoDShape;
+                    System.out.println(polygon.numSides());
+                }
+            }
         }
     }
 }

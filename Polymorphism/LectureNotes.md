@@ -2,134 +2,114 @@
 
 ## Version context
 
-- **Current version:** `v0.6.0`
+- **Current version:** `v0.7.0`
 
 ## Prior Version Context
 
-- **Previous version:** `v0.5.1`
-- **What it did:** demonstrated upcasting/downcasting with `Square` and `Rectangle`, showing that the reference type controls which methods are visible, and that unsafe downcasts can throw `ClassCastException`.
-- **Why change:** all of our 2D shapes share common behaviors (`area`, `perimeter`), so we want a shared parent type that enforces that contract.
+- **Previous version:** `v0.6.0`
+- **What it did:** introduced `TwoDShape` as an abstract class with abstract `area()` and `perimeter()` methods.
+- **Why change:** as we add more shapes, we want (1) better reuse (Circle is a special Ellipse) and (2) better organization (polygons vs non-polygons).
 
 ---
 
-## What the code looks like right now (v0.6.0)
+## What the code looks like right now (v0.7.0)
 
 Open:
 
+- `src/main/java/io/github/nathanjrussell/shapes/Shape.java`
 - `src/main/java/io/github/nathanjrussell/shapes/twod/TwoDShape.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/Circle.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/Rectangle.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/Square.java`
+
+Polygons:
+
+- `src/main/java/io/github/nathanjrussell/shapes/twod/polygons/Polygon.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/polygons/Rectangle.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/polygons/Square.java`
+
+Non-polygons:
+
+- `src/main/java/io/github/nathanjrussell/shapes/twod/nonpolygons/NonPolygon.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/nonpolygons/Ellipse.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/nonpolygons/Circle.java`
+
+And the demo:
+
+- `src/main/java/io/github/nathanjrussell/Main.java`
 
 ---
 
-## New: `TwoDShape` (abstract class)
+## New/updated hierarchy
 
-We added a single abstract base class for all 2D shapes:
+We now have an abstract class “spine” for shapes:
 
-- `TwoDShape`
+- `Shape` (abstract)
+  - `TwoDShape` (abstract)
+    - `Polygon` (abstract)
+      - `Rectangle`
+        - `Square`
+    - `NonPolygon` (abstract)
+      - `Ellipse`
+        - `Circle`
 
-### What an abstract class is
-
-An **abstract class** is a class that:
-
-- can have fields, constructors, and concrete methods (like a normal class)
-- can also declare **abstract methods**
-- cannot be instantiated directly
-
-So this is not allowed:
-
-- `new TwoDShape()`
-
-But this is allowed:
-
-- `class Rectangle extends TwoDShape { ... }`
-
-### Abstract methods: `area()` and `perimeter()`
-
-In `TwoDShape`, we declared:
-
-- `public abstract double area();`
-- `public abstract double perimeter();`
-
-An **abstract method** has no body.
-It’s a promise that every concrete subclass must provide an implementation.
-
-That matches our domain perfectly:
-
-- every 2D shape must be able to compute area
-- every 2D shape must be able to compute perimeter
-
-### What changed in the concrete shapes
-
-- `Circle extends TwoDShape`
-- `Rectangle extends TwoDShape`
-- `Square extends Rectangle` (and still indirectly extends `TwoDShape`)
-
-This sets up a single shared type so we can eventually write code like:
-
-- `List<TwoDShape> shapes = ...;`
+The key idea is that each level adds structure and meaning.
 
 ---
 
-## Using `ArrayList<TwoDShape>` (polymorphism in a collection)
+## Circle is a special Ellipse
 
-Now that we have a shared parent type, we can create a single list that holds multiple concrete shapes.
+A circle can be modeled as an ellipse where the two radii are equal.
 
-For example:
+So in this version:
 
-- `ArrayList<TwoDShape> shapes = new ArrayList<>();`
+- `Circle extends Ellipse`
 
-Then we can add any object that is-a `TwoDShape`:
+That allows `Circle` to reuse:
 
-- `shapes.add(new Circle(2.0));`
-- `shapes.add(new Rectangle(4.0, 6.0));`
-- `shapes.add(new Square(3.0));`
+- the ellipse area formula
+- the ellipse perimeter approximation
 
-Why does this work?
+While still providing a circle-specific method:
 
-- each of those classes **extends `TwoDShape`** (directly or indirectly)
-- so Java can safely treat each of them as a `TwoDShape` when storing them in the list (upcasting)
+- `radius()`
 
-### Important: the reference type controls what you can call
+---
 
-Inside a loop like:
+## Packages for organization (polygons vs non-polygons)
 
-- `for (TwoDShape shape : shapes) { ... }`
+We split 2D shapes into subpackages:
 
-You can only call the methods guaranteed by the **declared type** (`TwoDShape`):
+- `io.github.nathanjrussell.shapes.twod.polygons`
+- `io.github.nathanjrussell.shapes.twod.nonpolygons`
 
-- `shape.area()`
-- `shape.perimeter()`
+This keeps the directory structure aligned with the design.
 
-You *cannot* call shape-specific methods without downcasting.
-For example, this will not compile:
+---
 
-- `shape.radius()`
-- `shape.width()`
-- `shape.side()`
+## Polymorphism with `ArrayList<TwoDShape>`
 
-That’s a feature, not a bug:
+Because everything ultimately extends `TwoDShape`, `Main` can build a single list:
 
-- it keeps your loop generic
-- and it’s exactly why putting shared behavior (`area`, `perimeter`) in the abstract parent class is so powerful
+- `ArrayList<TwoDShape>`
+
+Then it can loop and safely call only what’s guaranteed by the `TwoDShape` type:
+
+- `area()`
+- `perimeter()`
+
+Any more specific method (like `numSides`) would require a more specific reference type or a downcast.  Notice the nested if statement further refining twoDShape to Polygon to ensure it’s safe to call `numSides()`.
 
 ---
 
 ## Next step (preview of the next lecture)
 
-Next iteration, we’ll expand the hierarchy and organization:
+As this hierarchy grows, notice something important:
 
-1. Add an `Ellipse` class
-   - refactor `Circle` to extend `Ellipse`
+- many of these abstract classes don’t provide default behavior
+- they mainly exist to require certain methods and create a “type label” in the hierarchy
 
-2. Separate polygons from non-polygons
-   - use packages to keep the taxonomy readable
+When a type exists primarily to define a contract (and not shared code/state), it may be a better fit for an **interface**.
 
-3. Introduce a larger abstract class hierarchy
-   - an abstract `Shape`
-   - an abstract `TwoDShape`
-   - an abstract `Polygon`
-   - an abstract `NonPolygon`
+Next version, we’ll discuss:
 
-This will make it easier to model new shapes while keeping code reuse and polymorphism clean.
+- when an abstract class is the right tool
+- when an interface is the right tool
+- how to mix them responsibly

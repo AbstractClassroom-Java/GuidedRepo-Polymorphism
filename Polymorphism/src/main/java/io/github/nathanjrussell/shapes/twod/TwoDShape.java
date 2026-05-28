@@ -1,6 +1,8 @@
 package io.github.nathanjrussell.shapes.twod;
 
-public abstract class TwoDShape {
+import io.github.nathanjrussell.shapes.Shape;
+
+public abstract class TwoDShape extends Shape {
 
     public abstract double area();
 
