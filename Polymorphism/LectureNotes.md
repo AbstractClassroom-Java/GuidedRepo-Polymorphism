@@ -2,17 +2,17 @@
 
 ## Version context
 
-- **Current version:** `v0.3.1`
+- **Current version:** `v0.3.0`
 
 ## Prior Version Context
 
-- **Previous version:** `v0.3.0`
-- **What it did:** introduced `Circle`, `Rectangle`, and `Square` with `area()` and `perimeter()` instance methods.
-- **Why change:** we’re simplifying the repo so it focuses on object encapsulation without introducing utility/helper classes.
+- **Previous version:** `v0.2.0`
+- **What it did:** introduced the `ShapeUtility` class to compute area and perimeter for all shapes.
+- **What it was missing:** the idea that each shape should be responsible for its own area and perimeter calculations. The `ShapeUtility` class was a procedural approach that didn't leverage object-oriented principles.
 
 ---
 
-## What the code looks like right now (v0.3.1)
+## What the code looks like right now (v0.3.0)
 
 Open these files:
 
@@ -21,7 +21,7 @@ Open these files:
 - `src/main/java/io/github/nathanjrussell/Square.java`
 - `src/main/java/io/github/nathanjrussell/Main.java`
 
-### What changed from v0.3.0
+### What changed from v0.2.0
 
 - Shape math is now implemented directly inside each shape class.
 - There is no `ShapeUtility`-style helper being used.
