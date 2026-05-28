@@ -1,6 +1,6 @@
 package io.github.nathanjrussell.shapes.twod.nonpolygons;
 
-public class Ellipse extends NonPolygon {
+public class Ellipse implements NonPolygon {
 
     private final double a;
     private final double b;

@@ -26,12 +26,12 @@ public class Main {
         System.out.println(square.perimeter());
         System.out.println(square.side());
 
-        Rectangle typedAsRectangle = new Square(10.0);
-        System.out.println(typedAsRectangle.area());
-        System.out.println(typedAsRectangle.perimeter());
-        System.out.println(((Square) typedAsRectangle).side());
+        Polygon typedAsPolygon = new Square(10.0);
+        System.out.println(typedAsPolygon.area());
+        System.out.println(typedAsPolygon.perimeter());
+        System.out.println(typedAsPolygon.numSides());
 
-        Rectangle notASquare = new Rectangle(2.0, 7.0);
+        Polygon notASquare = new Rectangle(2.0, 7.0);
         try {
             Square castedSquare = (Square) notASquare;
             System.out.println(castedSquare.side());

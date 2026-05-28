@@ -2,114 +2,111 @@
 
 ## Version context
 
-- **Current version:** `v0.7.0`
+- **Current version:** `v0.8.0`
 
 ## Prior Version Context
 
-- **Previous version:** `v0.6.0`
-- **What it did:** introduced `TwoDShape` as an abstract class with abstract `area()` and `perimeter()` methods.
-- **Why change:** as we add more shapes, we want (1) better reuse (Circle is a special Ellipse) and (2) better organization (polygons vs non-polygons).
+- **Previous version:** `v0.7.0`
+- **What it did:** built an abstract-class hierarchy (`Shape` → `TwoDShape` → `Polygon` / `NonPolygon`) and improved reuse/organization (Ellipse + packages).
+- **Why change:** many of our abstract classes were acting mostly like “requirements” (contracts) without providing shared state or default behavior.
 
 ---
 
-## What the code looks like right now (v0.7.0)
+## What the code looks like right now (v0.8.0)
 
-Open:
+Open these types:
 
 - `src/main/java/io/github/nathanjrussell/shapes/Shape.java`
 - `src/main/java/io/github/nathanjrussell/shapes/twod/TwoDShape.java`
-
-Polygons:
-
 - `src/main/java/io/github/nathanjrussell/shapes/twod/polygons/Polygon.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/polygons/Rectangle.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/polygons/Square.java`
-
-Non-polygons:
-
 - `src/main/java/io/github/nathanjrussell/shapes/twod/nonpolygons/NonPolygon.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/nonpolygons/Ellipse.java`
-- `src/main/java/io/github/nathanjrussell/shapes/twod/nonpolygons/Circle.java`
 
-And the demo:
+And some implementations:
 
-- `src/main/java/io/github/nathanjrussell/Main.java`
-
----
-
-## New/updated hierarchy
-
-We now have an abstract class “spine” for shapes:
-
-- `Shape` (abstract)
-  - `TwoDShape` (abstract)
-    - `Polygon` (abstract)
-      - `Rectangle`
-        - `Square`
-    - `NonPolygon` (abstract)
-      - `Ellipse`
-        - `Circle`
-
-The key idea is that each level adds structure and meaning.
+- `.../polygons/Rectangle.java`
+- `.../polygons/Square.java`
+- `.../nonpolygons/Ellipse.java`
+- `.../nonpolygons/Circle.java`
 
 ---
 
-## Circle is a special Ellipse
+## Refactor: abstract classes → interfaces
 
-A circle can be modeled as an ellipse where the two radii are equal.
+In this version, we replaced several abstract classes with **interfaces**:
 
-So in this version:
+- `Shape` is now an interface
+- `TwoDShape` is now an interface
+- `Polygon` is now an interface
+- `NonPolygon` is now an interface
 
-- `Circle extends Ellipse`
+These interfaces form a type hierarchy:
 
-That allows `Circle` to reuse:
+- `TwoDShape extends Shape`
+- `Polygon extends TwoDShape`
+- `NonPolygon extends TwoDShape`
 
-- the ellipse area formula
-- the ellipse perimeter approximation
+### Interfaces can type objects
 
-While still providing a circle-specific method:
+Even though interfaces aren’t classes, you can still use them as variable types and collection element types.
 
-- `radius()`
-
----
-
-## Packages for organization (polygons vs non-polygons)
-
-We split 2D shapes into subpackages:
-
-- `io.github.nathanjrussell.shapes.twod.polygons`
-- `io.github.nathanjrussell.shapes.twod.nonpolygons`
-
-This keeps the directory structure aligned with the design.
-
----
-
-## Polymorphism with `ArrayList<TwoDShape>`
-
-Because everything ultimately extends `TwoDShape`, `Main` can build a single list:
+For example, `Main` can use:
 
 - `ArrayList<TwoDShape>`
 
-Then it can loop and safely call only what’s guaranteed by the `TwoDShape` type:
+…and store any object that implements `TwoDShape`.
 
-- `area()`
-- `perimeter()`
+### Interfaces can extend other interfaces
 
-Any more specific method (like `numSides`) would require a more specific reference type or a downcast.  Notice the nested if statement further refining twoDShape to Polygon to ensure it’s safe to call `numSides()`.
+Just like classes can form an inheritance chain, interfaces can form a contract chain:
+
+- `Polygon` is a `TwoDShape`
+- so every polygon must also fulfill the `TwoDShape` contract (`area`, `perimeter`)
 
 ---
 
-## Next step (preview of the next lecture)
+## When to use an abstract class vs an interface
 
-As this hierarchy grows, notice something important:
+### Abstract class is a good fit when:
 
-- many of these abstract classes don’t provide default behavior
-- they mainly exist to require certain methods and create a “type label” in the hierarchy
+- you need to share **state** (fields) across subclasses
+- you want to provide **default behavior** (implemented methods)
+- you want to enforce a common constructor story
 
-When a type exists primarily to define a contract (and not shared code/state), it may be a better fit for an **interface**.
+### Interface is a good fit when:
 
-Next version, we’ll discuss:
+- you mainly want to require a set of methods (a contract)
+- you don’t need shared state or shared logic
+- you want a type that a class can implement alongside other inheritance
 
-- when an abstract class is the right tool
-- when an interface is the right tool
-- how to mix them responsibly
+In our shapes example, the “base types” were mostly contracts:
+
+- “any 2D shape must have area/perimeter”
+- “any polygon must report a number of sides”
+
+That maps very naturally to interfaces.
+
+---
+
+## What changed in the concrete types
+
+Because interfaces don’t provide constructor/field reuse, some relationships changed:
+
+- `Rectangle implements Polygon`
+- `Square implements Polygon` (instead of extending `Rectangle` here)
+- `Ellipse implements NonPolygon`
+- `Circle implements NonPolygon`
+
+To keep reuse without class inheritance, `Circle` now reuses ellipse math via **composition** (it wraps an `Ellipse` internally).
+
+---
+
+## Final note: last versioned change
+
+This is the last versioned change in this guided repo.
+
+From here, the goal is practice:
+
+- add new shapes
+- decide when you want inheritance vs composition
+- decide when you want interfaces vs abstract classes
+- keep `Main` generic by programming to the interface (`TwoDShape`, `Polygon`, etc.)

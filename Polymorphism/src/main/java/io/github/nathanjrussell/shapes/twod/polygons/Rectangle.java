@@ -1,6 +1,6 @@
 package io.github.nathanjrussell.shapes.twod.polygons;
 
-public class Rectangle extends Polygon {
+public class Rectangle implements Polygon {
 
     private final double width;
     private final double height;
@@ -8,10 +8,6 @@ public class Rectangle extends Polygon {
     public Rectangle(double width, double height) {
         this.width = width;
         this.height = height;
-    }
-
-    public int numSides() {
-        return 4;
     }
 
     public double width() {
@@ -30,5 +26,10 @@ public class Rectangle extends Polygon {
     @Override
     public double perimeter() {
         return 2 * (width + height);
+    }
+
+    @Override
+    public int numSides() {
+        return 4;
     }
 }
