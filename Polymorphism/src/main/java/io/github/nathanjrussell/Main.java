@@ -4,19 +4,16 @@ public class Main {
 
     public static void main(String[] args) {
 
-        double radius = 5.5;
-        System.out.println(ShapeUtility.circleArea(radius));
-        System.out.println(ShapeUtility.circleCircumference(radius));
-        System.out.println(ShapeUtility.circlePerimeter(radius));
-        System.out.println(ShapeUtility.circleDiameter(radius));
+        Circle circle = new Circle(5.5);
+        System.out.println(circle.area());
+        System.out.println(circle.perimeter());
 
-        double width = 4.0;
-        double height = 6.0;
-        System.out.println(ShapeUtility.getRectangleArea(width, height));
-        System.out.println(ShapeUtility.getRectanglePerimeter(width, height));
+        Rectangle rectangle = new Rectangle(4.0, 6.0);
+        System.out.println(rectangle.area());
+        System.out.println(rectangle.perimeter());
 
-        double side = 3.0;
-        System.out.println(ShapeUtility.getSquareArea(side));
-        System.out.println(ShapeUtility.getSquarePerimeter(side));
+        Square square = new Square(3.0);
+        System.out.println(square.area());
+        System.out.println(square.perimeter());
     }
 }
