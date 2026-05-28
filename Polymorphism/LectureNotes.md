@@ -2,136 +2,134 @@
 
 ## Version context
 
-- **Current version:** `v0.5.1`
+- **Current version:** `v0.6.0`
 
 ## Prior Version Context
 
-- **Previous version:** `v0.5.0`
-- **What it did:** introduced a `io.github.nathanjrussell.shapes.twod` package to group the 2D shape classes and updated imports accordingly.
-- **Why change:** now that inheritance exists (`Square extends Rectangle`), we can demonstrate how *reference type* affects which methods you can call.
+- **Previous version:** `v0.5.1`
+- **What it did:** demonstrated upcasting/downcasting with `Square` and `Rectangle`, showing that the reference type controls which methods are visible, and that unsafe downcasts can throw `ClassCastException`.
+- **Why change:** all of our 2D shapes share common behaviors (`area`, `perimeter`), so we want a shared parent type that enforces that contract.
 
 ---
 
-## What the code looks like right now (v0.5.1)
+## What the code looks like right now (v0.6.0)
 
 Open:
 
+- `src/main/java/io/github/nathanjrussell/shapes/twod/TwoDShape.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/Circle.java`
 - `src/main/java/io/github/nathanjrussell/shapes/twod/Rectangle.java`
 - `src/main/java/io/github/nathanjrussell/shapes/twod/Square.java`
-- `src/main/java/io/github/nathanjrussell/Main.java`
 
 ---
 
-## Upcasting: a `Square` can be typed as a `Rectangle`
+## New: `TwoDShape` (abstract class)
 
-Because `Square extends Rectangle`, a `Square` **is a** `Rectangle`.
+We added a single abstract base class for all 2D shapes:
 
-That means this is legal:
+- `TwoDShape`
 
-- `Rectangle typedAsRectangle = new Square(10.0);`
-
-This is called **upcasting** (using a child object through a parent type).
-
-### What you can call depends on the reference type
-
-Even though the object is a `Square`, the variable is typed as `Rectangle`.
-
-So:
-
-- `typedAsRectangle.area()` works
-- `typedAsRectangle.perimeter()` works
-
-…but:
-
-- `typedAsRectangle.side()` does **not** compile
-
-Why?
-
-- the compiler checks method availability based on the **declared type** (`Rectangle`)
-
-This is one of the key ideas behind polymorphism: you can restrict what’s visible by choosing an appropriate supertype.
-
----
-
-## Downcasting and runtime type checks
-
-If you want to call `side()`, you need a variable typed as `Square`.
-
-That sometimes leads people to do a **downcast**:
-
-- `Square s = (Square) someRectangle;`
-
-This compiles, but it’s only safe when the runtime object is *actually* a `Square`.
-
-### What happens if it’s not really a `Square`?
-
-If the runtime object is a plain `Rectangle`, Java throws a `ClassCastException`.
-
-In `Main`, we demonstrate this and handle it:
-
-- attempt to cast a `Rectangle` into a `Square`
-- catch `ClassCastException` and print a message
-
----
-
-## Segway: we need a shared 2D shape parent type
-
-At this point, notice a pattern:
-
-- `Circle`, `Rectangle`, and `Square` are all 2D shapes
-- they all provide:
-  - `area()`
-  - `perimeter()`
-
-But we still don’t have a single parent type that represents “any 2D shape”.
-
-This is where an **abstract class** becomes useful.
-
----
-
-## Abstract classes and abstract methods (what we’re building next)
-
-### What is an abstract class?
+### What an abstract class is
 
 An **abstract class** is a class that:
 
-- can define fields and concrete methods (like normal)
-- can define abstract methods (methods with no body)
-- **cannot** be instantiated directly
+- can have fields, constructors, and concrete methods (like a normal class)
+- can also declare **abstract methods**
+- cannot be instantiated directly
 
-So you can’t do:
+So this is not allowed:
 
 - `new TwoDShape()`
 
-…but you *can* do:
+But this is allowed:
 
 - `class Rectangle extends TwoDShape { ... }`
 
-### Why use one here?
+### Abstract methods: `area()` and `perimeter()`
 
-We want a single “2D shape” type that guarantees:
-
-- every 2D shape has an `area()`
-- every 2D shape has a `perimeter()`
-
-Those are perfect candidates for **abstract methods**:
+In `TwoDShape`, we declared:
 
 - `public abstract double area();`
 - `public abstract double perimeter();`
 
-Each concrete shape will be required to implement them.
+An **abstract method** has no body.
+It’s a promise that every concrete subclass must provide an implementation.
 
-This gives us a shared type for future code like:
+That matches our domain perfectly:
+
+- every 2D shape must be able to compute area
+- every 2D shape must be able to compute perimeter
+
+### What changed in the concrete shapes
+
+- `Circle extends TwoDShape`
+- `Rectangle extends TwoDShape`
+- `Square extends Rectangle` (and still indirectly extends `TwoDShape`)
+
+This sets up a single shared type so we can eventually write code like:
 
 - `List<TwoDShape> shapes = ...;`
 
 ---
 
+## Using `ArrayList<TwoDShape>` (polymorphism in a collection)
+
+Now that we have a shared parent type, we can create a single list that holds multiple concrete shapes.
+
+For example:
+
+- `ArrayList<TwoDShape> shapes = new ArrayList<>();`
+
+Then we can add any object that is-a `TwoDShape`:
+
+- `shapes.add(new Circle(2.0));`
+- `shapes.add(new Rectangle(4.0, 6.0));`
+- `shapes.add(new Square(3.0));`
+
+Why does this work?
+
+- each of those classes **extends `TwoDShape`** (directly or indirectly)
+- so Java can safely treat each of them as a `TwoDShape` when storing them in the list (upcasting)
+
+### Important: the reference type controls what you can call
+
+Inside a loop like:
+
+- `for (TwoDShape shape : shapes) { ... }`
+
+You can only call the methods guaranteed by the **declared type** (`TwoDShape`):
+
+- `shape.area()`
+- `shape.perimeter()`
+
+You *cannot* call shape-specific methods without downcasting.
+For example, this will not compile:
+
+- `shape.radius()`
+- `shape.width()`
+- `shape.side()`
+
+That’s a feature, not a bug:
+
+- it keeps your loop generic
+- and it’s exactly why putting shared behavior (`area`, `perimeter`) in the abstract parent class is so powerful
+
+---
+
 ## Next step (preview of the next lecture)
 
-**Next step:** create an abstract class named `TwoDShape` in the 2D shapes package and refactor all 2D shapes to extend it.
+Next iteration, we’ll expand the hierarchy and organization:
 
-- `TwoDShape` will declare `area()` and `perimeter()` as abstract methods.
-- `Circle`, `Rectangle`, and `Square` will become subclasses of `TwoDShape`.
+1. Add an `Ellipse` class
+   - refactor `Circle` to extend `Ellipse`
 
-After that, we’ll be ready to grow the hierarchy further (Ellipse + polygon vs non-polygon) without losing organization.
+2. Separate polygons from non-polygons
+   - use packages to keep the taxonomy readable
+
+3. Introduce a larger abstract class hierarchy
+   - an abstract `Shape`
+   - an abstract `TwoDShape`
+   - an abstract `Polygon`
+   - an abstract `NonPolygon`
+
+This will make it easier to model new shapes while keeping code reuse and polymorphism clean.

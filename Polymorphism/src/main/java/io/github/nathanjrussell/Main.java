@@ -3,6 +3,9 @@ package io.github.nathanjrussell;
 import io.github.nathanjrussell.shapes.twod.Circle;
 import io.github.nathanjrussell.shapes.twod.Rectangle;
 import io.github.nathanjrussell.shapes.twod.Square;
+import io.github.nathanjrussell.shapes.twod.TwoDShape;
+
+import java.util.ArrayList;
 
 public class Main {
 
@@ -32,6 +35,16 @@ public class Main {
             System.out.println(castedSquare.side());
         } catch (ClassCastException e) {
             System.out.println("Tried to treat a Rectangle as a Square, but it wasn't a Square at runtime.");
+        }
+
+        ArrayList<TwoDShape> shapes = new ArrayList<>();
+        shapes.add(new Circle(1.0));
+        shapes.add(new Rectangle(2.0, 3.0));
+        shapes.add(new Square(4.0));
+
+        for (TwoDShape shape : shapes) {
+            System.out.println("Area: " + shape.area());
+            System.out.println("Perimeter: " + shape.perimeter());
         }
     }
 }

@@ -1,6 +1,6 @@
 package io.github.nathanjrussell.shapes.twod;
 
-public class Circle {
+public class Circle extends TwoDShape {
 
     private final double radius;
 
@@ -12,10 +12,12 @@ public class Circle {
         return radius;
     }
 
+    @Override
     public double area() {
         return Math.PI * radius * radius;
     }
 
+    @Override
     public double perimeter() {
         return 2 * Math.PI * radius;
     }
