@@ -2,102 +2,89 @@
 
 ## Version context
 
-- **Current version:** `v0.4.0`
+- **Current version:** `v0.5.0`
 
 ## Prior Version Context
 
-- **Previous version:** `v0.3.0`
-- **What it did:** introduced `Circle`, `Rectangle`, and `Square` as separate classes, each responsible for its own calculations.
-- **What it was missing:** reuse between related types (a square is a special kind of rectangle).
+- **Previous version:** `v0.4.0`
+- **What it did:** refactored `Square` to extend `Rectangle`, introducing inheritance and the `super(...)` constructor call.
+- **Why change:** we now have multiple related classes that represent **2D shapes**, and we want the codebase to reflect that organization.
 
 ---
 
-## What the code looks like right now (v0.4.0)
+## What the code looks like right now (v0.5.0)
 
-Open these files:
+### New package for 2D shapes
 
-- `src/main/java/io/github/nathanjrussell/Rectangle.java`
-- `src/main/java/io/github/nathanjrussell/Square.java`
+The 2D shape classes now live in a dedicated package:
+
+- `io.github.nathanjrussell.shapes.twod`
+
+Files to open:
+
+- `src/main/java/io/github/nathanjrussell/shapes/twod/Circle.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/Rectangle.java`
+- `src/main/java/io/github/nathanjrussell/shapes/twod/Square.java`
+
+And the entry point:
+
 - `src/main/java/io/github/nathanjrussell/Main.java`
 
-### What changed from v0.3.0
+---
 
-We refactored `Square` to **extend** `Rectangle`.
+## Packages in Java (directories + namespaces)
 
-That means:
+A Java **package** is mainly a *namespace*.
 
-- `Square` now *inherits* `area()` and `perimeter()` from `Rectangle`.
-- `Square` no longer needs its own `side` field.
-- We removed duplicated formula code.
+In practice, it’s also reflected by directories:
 
-So instead of “Square re-implementing rectangle logic”, we model the relationship directly:
+- package `io.github.nathanjrussell.shapes.twod`
+- directory `io/github/nathanjrussell/shapes/twod/`
 
-- a square **is a** rectangle where `width == height`.
+This directory structure helps you organize code and (optionally) limit access using package-private scope.
+
+### Every class must declare its package
+
+When a class is inside a package, it must declare it at the top of the file:
+
+- `package io.github.nathanjrussell.shapes.twod;`
+
+If the package declaration doesn’t match the folder structure, imports and compilation will break.
+
+### Imports update
+
+Because the shapes moved packages, `Main` now imports them:
+
+- `import io.github.nathanjrussell.shapes.twod.Circle;`
+- `import io.github.nathanjrussell.shapes.twod.Rectangle;`
+- `import io.github.nathanjrussell.shapes.twod.Square;`
+
+All three of the imports could be replaced with a single wildcard import:
+- `import io.github.nathanjrussell.shapes.twod.*;`
+
+However, it’s generally considered better practice to import specific classes rather than using wildcards, as it improves readability and helps avoid naming conflicts.
 
 ---
 
-## Inheritance and `super`
+## A pattern worth noticing
 
-### What does `extends` mean?
+All of our 2D shapes provide the same behaviors:
 
-When you write:
+- `area()`
+- `perimeter()`
 
-- `class Square extends Rectangle`
+Right now, each class defines those methods on its own (or inherits them).
 
-You are saying:
-
-- `Square` is a **subclass** (child type)
-- `Rectangle` is a **superclass** (parent type)
-
-A `Square` automatically gets access to the public methods of `Rectangle`.
-
-### The `super(...)` constructor call
-
-In `Square(double side)`, we call:
-
-- `super(side, side)`
-
-That runs the `Rectangle` constructor to set up the rectangle state (width/height).
-
-#### Important rule
-
-In Java, a constructor’s call to `super(...)` must be the **first statement** in the constructor.
-
-Why?
-
-- the parent part of the object must be initialized before the child can safely do more work
-
-If you don’t write `super(...)`, Java will try to insert `super()` automatically.
-That only works if the superclass has a no-argument constructor.
-
----
-
-## Why this refactor helps
-
-- Less duplicated code.
-- Clearer relationship between shapes.
-- Lets us talk about reuse, coupling, and modeling decisions.
-
-At the same time, inheritance introduces new design questions:
-
-- What behaviors should be inherited?
-- Can every `Square` be used anywhere a `Rectangle` is expected?
-- What happens if rectangles later gain setters like `setWidth()` and `setHeight()`?
-
-We’ll keep those questions in mind as we continue.
+This is pointing us toward a shared parent type.
 
 ---
 
 ## Next step (preview of the next lecture)
 
-We now have several classes that are clearly **2D shapes** (`Circle`, `Rectangle`, `Square`).
+Next, we’ll create a shared base type for all 2D shapes:
 
-Next we’ll create a package (folder) for them, for example:
+- an **abstract class** that every 2D shape will extend
 
-- `io.github.nathanjrussell.shapes.twod`
+That abstract class will define the common “shape contract” (area/perimeter), while still preventing direct instantiation.
 
-Purpose:
-
-- improve organization
-- reduce clutter in the root package
-- use packages/directories as a kind of “encapsulation boundary” to help manage scope as the project grows
+This is a key bridge toward full polymorphism later.

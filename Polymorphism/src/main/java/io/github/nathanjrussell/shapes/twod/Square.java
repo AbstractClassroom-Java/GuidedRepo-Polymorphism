@@ -1,4 +1,4 @@
-package io.github.nathanjrussell;
+package io.github.nathanjrussell.shapes.twod;
 
 public class Square extends Rectangle {
 
