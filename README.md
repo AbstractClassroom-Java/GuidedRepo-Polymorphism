@@ -14,6 +14,8 @@ The runnable Maven project lives in `Polymorphism/`.
 - Main lecture notes (in-repo): `Polymorphism/LectureNotes.md`
 - Code: `Polymorphism/src/main/java/...`
 
+This guided repo will transition from a procedural style, poorly organized codebase to a more object-oriented design with a rich type hierarchy and interfaces. You will observe design decisions that may appear like distinctions without differences at first, but they will become clearer as the project evolves.
+
 ---
 
 ## How to use this repo
